@@ -16,7 +16,6 @@ class SNS {
      */
 
     constructor(params){
-logger.info('sns params:', params);
         params = params || {};
         this.sns = new AWS.SNS({region: params.snsRegion || 'ap-northeast-1'});
 
@@ -58,14 +57,13 @@ function *sendJson(params){
     if(params.deviceArns === undefined) params.deviceArns = [];
     if(typeof params.deviceArns === 'string') params.deviceArns = params.deviceArns.split(' ');
 
-    let ret = [];
+    let ret = {};
     const payload = _buildPayload(params.json);
     for(const deviceArn of params.deviceArns){
-        let result = yield this.sendPayload({payload, deviceArn});
-        logger.info('arn result:', deviceArn, result);
-        ret.push(result);
+        ret[deviceArn] = yield this.sendPayload({payload, deviceArn});
     }
 
+    console.log('(simple-aws-sns) sendJson result:', ret);
     return ret;
 }
 
@@ -81,14 +79,14 @@ function *sendPayload(params){
     // do publish
     let self = this;
     return yield new Promise(function(resolve, reject){
-        logger.info('push start:');
+        console.log('(simeple-aws-sns) sendPayload start:');
         const start = Date.now();
         self.sns.publish({
             Message: params.payload,
             MessageStructure: 'json',
             TargetArn: params.deviceArn
         }, function(err, data){
-            logger.info('push end:', Date.now()-start, err, data);
+            console.log('(simeple-aws-sns) sendPayload end: time, err, data:', Date.now()-start, err, data);
             if(err) reject(err);
             resolve(data);
         });
@@ -106,13 +104,13 @@ function *sendPayload(params){
 function *createDeviceArn(params){
     let self = this;
     return yield new Promise(function(resolve, reject){
-        logger.info('createDeviceArn start:');
+        console.log('(simeple-aws-sns) createDeviceArn start:');
         const start = Date.now();
         self.sns.createPlatformEndpoint({
             PlatformApplicationArn: self.snsAppArnMap[params.deviceType],
             Token: params.deviceToken
         }, function(err, data){
-            logger.info('createDeviceArn end:', Date.now()-start, err, data);
+            console.log('(simeple-aws-sns) createDeviceArn end: time, err, data:', Date.now()-start, err, data);
             if(err) reject(err);
             resolve(data.EndpointArn);
         });
@@ -154,6 +152,6 @@ function _buildPayload(params){
     payload.APNS = JSON.stringify(payload.APNS);
     payload = JSON.stringify(payload);
 
-    logger.info('payload:', payload);
+    console.log('(simple-aws-sns) payload built:', payload);
     return payload;
 }
