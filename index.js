@@ -112,7 +112,7 @@ function *createDeviceArn(params){
         }, function(err, data){
             console.log('(simeple-aws-sns) createDeviceArn end: time, err, data:', Date.now()-start, err, data);
             if(err) reject(err);
-            resolve(data.EndpointArn);
+            else resolve(data.EndpointArn);
         });
     });
 }
