@@ -25,6 +25,8 @@ class SNS {
         this.sendJson = sendJson;
         this.sendPayload = sendPayload;
         this.createDeviceArn = createDeviceArn;
+        this.getDevice = getDevice;
+        this.removeDevice = removeDevice;
     }
 }
 
@@ -98,6 +100,7 @@ function *sendPayload(params){
  * @param {Object} params
  * @param {String=ios,android} params.deviceType
  * @param {String} params.deviceToken
+ * @param {String} [params.userData] Custome user data to be stored
  * @return {String} Created deviceArn
  */
 
@@ -106,13 +109,62 @@ function *createDeviceArn(params){
     return yield new Promise(function(resolve, reject){
         console.log('(simeple-aws-sns) createDeviceArn start:');
         const start = Date.now();
-        self.sns.createPlatformEndpoint({
+
+        let platformData = {
             PlatformApplicationArn: self.snsAppArnMap[params.deviceType],
             Token: params.deviceToken
-        }, function(err, data){
+        };
+        if(params.userData) platformData.CustomUserData = params.userData;
+        self.sns.createPlatformEndpoint( platformData, function(err, data){
             console.log('(simeple-aws-sns) createDeviceArn end: time, err, data:', Date.now()-start, err, data);
             if(err) reject(err);
             else resolve(data.EndpointArn);
+        });
+    });
+}
+
+/**
+ * Get device enpoint data
+ * @param {String} deviceArn
+ * @return {Object} With attributes userData, deviceToken, enabled
+ */
+
+function *getDevice(deviceArn){
+    let self = this;
+    return yield new Promise(function(resolve, reject){
+        console.log('(simeple-aws-sns) getDevice start:');
+        const start = Date.now();
+
+        self.sns.getEndpointAttributes( {EndpointArn: deviceArn}, function(err, data){
+            console.log('(simeple-aws-sns) getDevice end: time, err, data:', Date.now()-start, err, data);
+            if(err) return reject(err);
+
+            let ret = {
+                userData: data.Attributes.CustomUserData,
+                deviceArn,
+                deviceToken: data.Attributes.Token
+            };
+            resolve(ret);
+        });
+    });
+}
+
+/**
+ * Remove device enpoint data
+ * @param {String} deviceArn
+ * @return {Object} 
+ */
+
+function *removeDevice(deviceArn){
+    let self = this;
+    return yield new Promise(function(resolve, reject){
+        console.log('(simeple-aws-sns) removeDevice start:');
+        const start = Date.now();
+
+        self.sns.deleteEndpoint( {EndpointArn: deviceArn}, function(err, data){
+            console.log('(simeple-aws-sns) removeDevice end: time, err, data:', Date.now()-start, err, data);
+            if(err) return reject(err);
+            resolve(data);
         });
     });
 }
