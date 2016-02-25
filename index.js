@@ -25,6 +25,7 @@ class SNS {
         this.sendJson = sendJson;
         this.sendPayload = sendPayload;
         this.createDeviceArn = createDeviceArn;
+        this.updateDevice = updateDevice;
         this.getDevice = getDevice;
         this.removeDevice = removeDevice;
     }
@@ -119,6 +120,35 @@ function *createDeviceArn(params){
             console.log('(simeple-aws-sns) createDeviceArn end: time, err, data:', Date.now()-start, err, data);
             if(err) reject(err);
             else resolve(data.EndpointArn);
+        });
+    });
+}
+
+/**
+ * Update device attributes
+ * @param {Object} params
+ * @param {String} params.deviceArn
+ * @param {String} [params.deviceToken]
+ * @param {String} [params.userData] Custome user data to be stored
+ */
+
+function *updateDevice(params){
+    let self = this;
+    return yield new Promise(function(resolve, reject){
+        console.log('(simeple-aws-sns) updateDevice start:');
+        const start = Date.now();
+
+        let attrData = {
+            Attributes: {
+                CustomUserData: params.userData,
+                Token: params.deviceToken
+            },
+            EndpointArn: params.deviceArn
+        };
+        self.sns.setEndpointAttributes( attrData, function(err, data){
+            console.log('(simeple-aws-sns) updateDevice end: time, err, data:', Date.now()-start, err, data);
+            if(err) reject(err);
+            else resolve(data);
         });
     });
 }
