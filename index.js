@@ -232,6 +232,7 @@ function _buildPayload(params){
     // correctly escape
     payload.GCM = JSON.stringify(payload.GCM);
     payload.APNS = JSON.stringify(payload.APNS);
+    payload.APNS_SANDBOX = payload.APNS;
     payload = JSON.stringify(payload);
 
     console.log('(simple-aws-sns) payload built:', payload);
