@@ -11,6 +11,7 @@
   "description": "simple aws sns",
   "devDependencies": {
     "assert": "^1.3.0",
+    "chai": "^3.5.0",
     "co": "^4.6.0",
     "should": "^7.1.1",
     "supertest": "^1.1.0"
@@ -26,9 +27,10 @@
   "name": "simple-aws-sns",
   "repository": {
     "type": "git",
-    "url": "git@github.com:kwela/simple-aws-sns.git"
+    "url": "git@github.com:hankchiutw/simple-aws-sns.git"
   },
   "scripts": {
+    "test": "mocha --recursive *.spec.js"
   },
-  "version": "1.0.6"
+  "version": "1.0.7"
 }

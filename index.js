@@ -81,6 +81,7 @@ function *sendJson(params){
 function *sendPayload(params){
     // do publish
     let self = this;
+
     return yield new Promise(function(resolve, reject){
         console.log('(simeple-aws-sns) sendPayload start:');
         const start = Date.now();
@@ -89,9 +90,14 @@ function *sendPayload(params){
             MessageStructure: 'json',
             TargetArn: params.deviceArn
         }, function(err, data){
-            console.log('(simeple-aws-sns) sendPayload end: time, err, data:', Date.now()-start, err, data);
-            if(err) reject(err);
-            resolve(data);
+            console.log('(simeple-aws-sns) sendPayload end: time:', Date.now()-start);
+            if(err){
+                console.warn('(simeple-aws-sns) end: err:', err);
+                resolve(err);
+            }else{
+                console.log('(simeple-aws-sns) sendPayload end: data:', data);
+                resolve();
+            }
         });
     });
 }
