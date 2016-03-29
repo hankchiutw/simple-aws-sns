@@ -211,29 +211,25 @@ function *removeDevice(deviceArn){
  * @param {String} params.message App side action identifier
  * @param {String} params.alert Main text displayed
  * @param {String} params.data Optional. Extra data.
- * @param {String} params.sound Optional. For ios. Default 'Ding'
- * @param {String} params.badge Optional. For ios. Default 0
+ * @param {String} params.sound Optional. Default 'Ding'
+ * @param {String} params.badge Optional.
  */
 
 function _buildPayload(params){
     // common payload
     const basic = {
+        sound: params.sound || 'Ding',
         message: params.message,
         alert: params.alert
     };
     if(params.data !== undefined) basic.data = params.data;
+    if(params.badge !== undefined) basic.badge = params.badge;
 
     let payload = {
         default: 'default',
         GCM: { data: basic },
         APNS: { aps: basic }
     };
-
-    // for ios
-    Object.assign(payload.APNS.aps, {
-        sound: params.sound || 'Ding',
-        badge: params.badge || 0
-    });
 
     // correctly escape
     payload.GCM = JSON.stringify(payload.GCM);
